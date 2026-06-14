@@ -1,0 +1,9 @@
+# Google Cloud Hassas Kimlik Dosyaları
+client_secret.json
+token.json
+
+# Python Bağımlılıkları ve Önbellek
+__pycache__/
+*.pyc
+.env
+venv/
