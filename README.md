@@ -32,5 +32,5 @@ Projeyi kendi bilgisayarınızda kurmak ve Google Cloud bağlantısını sağlam
 pip install -r requirements.txt
 
 <pre>
-<img width="150" height="124" alt="image" src="https://github.com/user-attachments/assets/0343c54d-ebd2-407c-86d7-45b5adb8080f" />
+<img align = 'left' width="150" height="124" alt="image" src="https://github.com/user-attachments/assets/0343c54d-ebd2-407c-86d7-45b5adb8080f" />
 </pre>
