@@ -1,4 +1,4 @@
-# Anı Kasası (Memory Vault) 📸✨
+# Anı Kasası (Memory Vault) 📸✨  <--- README DÜZENLENİYOR 
 
 Anı Kasası, özel davetlerde ve etkinliklerde misafirlerin çektikleri o en doğal anları (fotoğraf ve videoları) doğrudan ev sahibinin **Google Fotoğraflar (Google Photos)** albümüne yüklemelerini sağlayan, sunucusuz (serverless) bir bulut otomasyon platformudur.
 
