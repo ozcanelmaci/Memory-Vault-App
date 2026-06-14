@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anı Kasası</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Urbanist:wght@300;500&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            /* Derin Slate */
+            color: #f8fafc;
+            font-family: 'Urbanist', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: #fbbf24;
+            /* Altın sarısı */
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 400px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .upload-container {
+            background: #1e293b;
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid #334155;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            border: 2px dashed #475569;
+            border-radius: 12px;
+            display: inline-block;
+            padding: 30px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .custom-file-upload:hover {
+            border-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.05);
+        }
+
+        .btn {
+            background-color: #fbbf24;
+            color: #0f172a;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 25px;
+            width: 100%;
+            transition: 0.3s;
+            display: none;
+            /* Dosya seçilmeden görünmez */
+        }
+
+        .btn:hover {
+            background-color: #f59e0b;
+        }
+
+        /* Yükleme animasyonu ve durum mesajı */
+        #statusMessage {
+            margin-top: 20px;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .success {
+            color: #10b981;
+        }
+
+        .error {
+            color: #ef4444;
+        }
+
+        .loader {
+            display: none;
+            border: 3px solid #334155;
+            border-top: 3px solid #fbbf24;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Anılarımızı<br>Paylaş</h1>
+    <p>Bu özel günümüzde çektiğiniz o güzel anları bizimle doğrudan paylaşın.</p>
+
+    <div class="upload-container">
+        <label class="custom-file-upload" id="dropZone">
+            <input type="file" id="fileInput" accept="image/*,video/*" multiple />
+            <span id="fileName">📸 Galeriye Git veya Dosya Seç</span>
+        </label>
+
+        <button class="btn" id="uploadBtn">Anıyı Gönder</button>
+        <div class="loader" id="loader"></div>
+        <div id="statusMessage"></div>
+    </div>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileName');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const loader = document.getElementById('loader');
+        const statusMessage = document.getElementById('statusMessage');
+
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files.length > 0) {
+                fileNameDisplay.textContent = this.files.length + " dosya seçildi";
+                fileNameDisplay.style.color = "#fbbf24";
+                uploadBtn.style.display = "block";
+                statusMessage.textContent = "";
+            }
+        });
+
+        uploadBtn.addEventListener('click', async () => {
+            const files = fileInput.files;
+            if (files.length === 0) return;
+
+            const maxMB = 250; // YENİ SINIR: 250 MB
+
+            // Önce tüm dosyaların boyutunu kontrol et
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size > maxMB * 1024 * 1024) {
+                    statusMessage.textContent = `Hata: "${files[i].name}" çok büyük (Maks. ${maxMB} MB). Lütfen bu dosyayı çıkarıp tekrar deneyin.`;
+                    statusMessage.className = 'error';
+                    return;
+                }
+            }
+
+            uploadBtn.style.display = 'none';
+            loader.style.display = 'block';
+            statusMessage.className = '';
+
+            let successCount = 0;
+            let failCount = 0;
+
+            // Dosyaları sunucuyu yormamak için tek tek sırayla yüklüyoruz
+            for (let i = 0; i < files.length; i++) {
+                statusMessage.textContent = `Yükleniyor... (${i + 1} / ${files.length}) - Lütfen sayfayı kapatmayın.`;
+                const formData = new FormData();
+                formData.append('file', files[i]);
+
+                try {
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                } catch (error) {
+                    failCount++;
+                }
+            }
+
+            loader.style.display = 'none';
+            if (failCount === 0) {
+                statusMessage.textContent = `${successCount} anı başarıyla kasaya eklendi!`;
+                statusMessage.className = 'success';
+            } else {
+                statusMessage.textContent = `${successCount} başarılı, ${failCount} hatalı yükleme.`;
+                statusMessage.className = 'error';
+            }
+
+            fileNameDisplay.textContent = "📸 Yeni anılar seç";
+            fileNameDisplay.style.color = "#94a3b8";
+            uploadBtn.style.display = 'block';
+            fileInput.value = ""; // Seçimi sıfırla
+        });
+    </script>
+</body>
+</html>
